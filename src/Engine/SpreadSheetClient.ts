@@ -280,8 +280,30 @@ class SpreadSheetClient {
     }
 
     public clearFormula(): void {
-        return;
+        const requestClearFormulaURL = `${this._baseURL}/document/clear/formula/${this._documentName}`;
+        
+        fetch(requestClearFormulaURL, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ "userName": this._userName })
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json() as Promise<DocumentTransport>;
+            } else {
+                throw new Error(`Failed to clear formula with status ${response.status}`);
+            }
+        })
+        .then((document: DocumentTransport) => {
+            this._updateDocument(document);
+        })
+        .catch(error => {
+            console.error('Error clearing formula:', error.message);
+        });
     }
+    
 
 
 

@@ -246,3 +246,37 @@ const port = PortsGlobal.serverPort;
 app.listen(port, () => {
     console.log(`listening on port ${port}`);
 });
+
+
+// PUT /document/clear/formula/:name
+app.put('/document/clear/formula/:name', (req: express.Request, res: express.Response) => {
+    const name = req.params.name;
+
+    // get the user name from the body
+    const userName = req.body.userName;
+
+    if (!userName) {
+        res.status(400).send('userName is required');
+        return;
+    }
+
+    // Check if the document exists
+    const documentNames = documentHolder.getDocumentNames();
+    if (documentNames.indexOf(name) === -1) {
+        res.status(404).send(`Document ${name} not found`);
+        return;
+    }
+
+    // Clear the formula
+    try {
+        const documentJSON = documentHolder.clearFormula(name, userName);
+        res.status(200).send(documentJSON);
+    } catch (error) {
+        if (error instanceof Error) {
+            console.error('Error while trying to clear formula:', error.message);
+        } else {
+            console.error('An unknown error occurred:', error);
+        }
+        res.status(500).send('Internal Server Error');
+    }
+});
