@@ -209,7 +209,8 @@ class SpreadSheetClient {
 
 
     public addToken(token: string): void {
-        const requestAddTokenURL = `${this._baseURL}/document/addtoken/${this._documentName}/${token}`;
+        const encodedToken = encodeURIComponent(token); // URL encode token
+        const requestAddTokenURL = `${this._baseURL}/document/addtoken/${this._documentName}/${encodedToken}`;  // Use the encoded token in the URL
         fetch(requestAddTokenURL, {
             method: 'PUT',
             headers: {
@@ -217,14 +218,27 @@ class SpreadSheetClient {
             },
             body: JSON.stringify({ "userName": this._userName })
         })
-            .then(response => {
-
-                return response.json() as Promise<DocumentTransport>;
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(errorData => {
+                    // If the server sends a JSON error message, print it:
+                    if (errorData.error) {
+                        console.error(errorData.error);
+                    }
+                    throw new Error('Failed to add token.');
+                });
             }
-            ).then((document: DocumentTransport) => {
-                this._updateDocument(document);
-            });
+            return response.json() as Promise<DocumentTransport>;
+        })
+        .then((document: DocumentTransport) => {
+            this._updateDocument(document);
+        })
+        .catch(error => {
+            console.error(error.message);
+        });
     }
+    
+    
 
     public addCell(cell: string): void {
         const requestAddCellURL = `${this._baseURL}/document/addcell/${this._documentName}/${cell}`;
