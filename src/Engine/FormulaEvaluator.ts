@@ -5,6 +5,10 @@ import { ErrorMessages } from "./GlobalDefinitions";
 export type FormulaType = string[];
 export type TokenType = string;
 
+
+/**
+ * This class evaluates a formula and returns the result.
+ */
 export class FormulaEvaluator {
   private _errorOccurred: boolean = false;
   private _errorMessage: string = "";
@@ -14,18 +18,37 @@ export class FormulaEvaluator {
   private _result: number = 0;
   private _lastResult: number = 0; // Initialized
 
+
+  /**
+   * Initializes the FormulaEvaluator with the provided SheetMemory object.
+   * @param memory 
+   */
   constructor(memory: SheetMemory) {
       this._sheetMemory = memory;
   }
 
+
+  /**
+   * @returns the current token
+   */
   private get currentToken(): TokenType {
       return this._currentFormula[this._currentTokenIndex];
   }
 
+
+  /**
+   * Advances to the next token in the formula.
+   */
   private advanceToken(): void {
       this._currentTokenIndex++;
   }
 
+
+  /**
+   * Checks if the current token matches the expected token. If not, sets an error message.
+   * @param expected 
+   * @returns 
+   */
   private matchToken(expected: TokenType): boolean {
       if (this.currentToken === expected) {
           this.advanceToken();
@@ -37,6 +60,12 @@ export class FormulaEvaluator {
       }
   }
 
+
+  /**
+   * Processes the basic elements in the formula, such as numbers, cell references, 
+   * or sub-expressions in parentheses.
+   * @returns the value of the basic element
+   */
   private factor(): number {
       if (this.isNumber(this.currentToken)) {
           const value = Number(this.currentToken);
@@ -64,6 +93,10 @@ export class FormulaEvaluator {
       }
   }
 
+  /**
+   * Processes multiplication and division operations.
+   * @returns the value of the term
+   */
   private term(): number {
     let value = this.factor();
     while (this.currentToken === '*' || this.currentToken === '/') {
@@ -85,6 +118,11 @@ export class FormulaEvaluator {
     return value;
   }
 
+
+  /**
+   * Processes addition and subtraction operations.
+   * @returns the value of the expression
+   */
   private expression(): number {
       let value = this.term();
       while (this.currentToken === '+' || this.currentToken === '-') {
@@ -99,6 +137,11 @@ export class FormulaEvaluator {
       return value;
   }
 
+
+  /**
+   * Evaluates the provided formula, returning its numerical result.
+   * @param formula 
+   */
   public evaluate(formula: FormulaType): number {
       this._currentFormula = formula;
       this._currentTokenIndex = 0;
@@ -120,14 +163,25 @@ export class FormulaEvaluator {
       return this._result;
   }
 
+
+  /**
+   * Getter for the error message.
+   */
   public get error(): string {
       return this._errorMessage;
   }
 
+
+  /**
+   * Getter for the result of the formula evaluation.
+   */
   public get result(): number {
       return this._result;
   }
 
+  /**
+   * Getter for the result of the previous formula evaluation.
+   */
   public get lastResult(): number { // Added getter for lastResult
       return this._lastResult;
   }
