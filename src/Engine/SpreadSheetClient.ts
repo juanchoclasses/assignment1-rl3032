@@ -14,7 +14,11 @@ import { Cell } from '../Engine/Cell';
 import { PortsGlobal } from '../PortsGlobal';
 
 
-
+/**
+ * The SpreadSheetClient class is the interface for the frontend to prepare fetch requests to the 
+ * server for the spreadsheet.
+ * 
+ */
 class SpreadSheetClient {
     private _serverPort: number = PortsGlobal.serverPort;
     private _baseURL: string = `http://localhost:${this._serverPort}`;
@@ -31,6 +35,11 @@ class SpreadSheetClient {
         this._timedFetch();
     }
 
+
+    /**
+     * Initializes a blank document with default values.
+     * @returns a blank document
+     */
     private _initializeBlankDocument(): DocumentTransport {
         const document: DocumentTransport = {
             columns: 5,
@@ -54,6 +63,8 @@ class SpreadSheetClient {
         }
         return document;
     }
+
+
     /**
      * 
      * Every .1 seconds, fetch the document from the server
@@ -83,22 +94,41 @@ class SpreadSheetClient {
         });
     }
 
+    /**
+     * Returns the current user name.
+     */
     public get userName(): string {
         return this._userName;
     }
 
+
+    /**
+     * Sets the current user name.
+     */
     public set userName(userName: string) {
         this._userName = userName;
     }
 
+
+    /**
+     * Returns the current document name.
+     */
     public get documentName(): string {
         return this._documentName;
     }
 
+
+    /**
+     * Sets the current document name.
+     */
     public set documentName(documentName: string) {
         this._documentName = documentName;
     }
 
+
+    /**
+     * @returns the current formula string of the document.
+     */
     public getFormulaString(): string {
         if (!this._document) {
             return '';
@@ -110,6 +140,11 @@ class SpreadSheetClient {
         return '';
     }
 
+
+    /**
+     * 
+     * @returns the current result string of the document
+     */
     public getResultString(): string {
         if (!this._document) {
             return '';
@@ -122,6 +157,11 @@ class SpreadSheetClient {
         return '';
     }
 
+
+    /**
+     * 
+     * @returns the current cell label of the document
+     */
     private _getCellValue(cellTransport: CellTransport): string {
         if (cellTransport.error === '') {
             return cellTransport.value.toString();
@@ -131,6 +171,12 @@ class SpreadSheetClient {
             return cellTransport.error;
         }
     }
+
+
+    /**
+     * 
+     * @returns a 2d array of strings that is [row][column] for the GUI.
+     */
     public getSheetDisplayStringsForGUI(): string[][] {
         if (!this._document) {
             return [];
@@ -158,6 +204,12 @@ class SpreadSheetClient {
         return sheetDisplayStrings;
     }
 
+
+    /**
+     * 
+     * @returns a string indicating if a cell is being edited and which cell is 
+     * the current cell.
+     */
     public getEditStatusString(): string {
         if (!this._document) {
             return 'no document';
@@ -168,6 +220,11 @@ class SpreadSheetClient {
         return `viewing: ${this._document.currentCell}`;
     }
 
+
+    /**
+     * 
+     * @returns the label of the current cell. 
+     */
     public getWorkingCellLabel(): string {
         if (!this._document) {
             return '';
@@ -175,9 +232,15 @@ class SpreadSheetClient {
         return this._document.currentCell;
     }
 
+
+    /**
+     * 
+     * @returns the editing status of the current cell.
+     */
     public getEditStatus(): boolean {
         return this._document.isEditing;
     }
+
 
     /**
      * ask for permission to edit a cell
@@ -207,7 +270,10 @@ class SpreadSheetClient {
     }
 
 
-
+    /**
+     * Adds a token to the document.
+     * @param token 
+     */
     public addToken(token: string): void {
         const encodedToken = encodeURIComponent(token); // URL encode token
         const requestAddTokenURL = `${this._baseURL}/document/addtoken/${this._documentName}/${encodedToken}`;  // Use the encoded token in the URL
@@ -239,7 +305,10 @@ class SpreadSheetClient {
     }
     
     
-
+    /**
+     * Adds a cell to the document.
+     * @param cell 
+     */
     public addCell(cell: string): void {
         const requestAddCellURL = `${this._baseURL}/document/addcell/${this._documentName}/${cell}`;
 
@@ -259,6 +328,10 @@ class SpreadSheetClient {
 
     }
 
+
+    /**
+     * Removes a token from the document.
+     */
     public removeToken(): void {
         const requestRemoveTokenURL = `${this._baseURL}/document/removetoken/${this._documentName}`;
         fetch(requestRemoveTokenURL, {
@@ -276,6 +349,11 @@ class SpreadSheetClient {
             });
     }
 
+
+    /**
+     * Requests view access for a given cell label.
+     * @param label 
+     */
     public requestViewByLabel(label: string): void {
         const requestViewURL = `${this._baseURL}/document/cell/view/${this._documentName}/${label}`;
         console.log(this._userName);
@@ -293,6 +371,10 @@ class SpreadSheetClient {
             });
     }
 
+
+    /**
+     * Clears the formula of the document.
+     */
     public clearFormula(): void {
         const requestClearFormulaURL = `${this._baseURL}/document/clear/formula/${this._documentName}`;
         
@@ -318,8 +400,6 @@ class SpreadSheetClient {
         });
     }
     
-
-
 
     /**
      * get the document from the server
@@ -349,7 +429,11 @@ class SpreadSheetClient {
 
     }
 
-
+    
+    /**
+     * Updates the current document representation based on the provided document data.
+     * @param document 
+     */
     private _updateDocument(document: DocumentTransport): void {
         const formula = document.formula;
         const result = document.result;
